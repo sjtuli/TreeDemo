@@ -1,0 +1,35 @@
+{% extends "tree.html" %}
+{% load static %}
+{% load markdown_extras %}
+{% block node %}
+
+<h4>{{department.name}}</h4>
+    <div class="entry-meta">
+      <span class="post-date"><a href="#"><time class="entry-date"
+                                                datetime="{{ node.created_time }}">{{ node.created_time }}</time></a></span>
+      <span class="post-author"><a href="#">{{ node.author }}</a></span>
+    </div>
+
+{% if user.is_superuser %}
+<a href="modify/"><button class="btn btn-default ">修改</button></a>
+{% endif %}
+
+{% for nodefile in nodefile %}
+{% if nodefile.pk %}
+<!--下载-->
+<div>
+<a href="{% url  'tree:download_file' department_id=nodefile.department_id pk=nodefile.pk %}" style="color : cornflowerblue; font-size: 20px">{{nodefile.File_name}}  &nbsp; 下载 </a>
+<a href="{% url  'tree:delete_file' department_id=nodefile.department_id pk=nodefile.pk %}" style="color : orangered; font-size: 20px"> &nbsp;&nbsp; 删除 </a>
+</div>
+{% endif %}
+{% endfor %}
+
+<article class=" post-{{ node.pk }}">
+  <div class="entry-content clearfix">
+    <br />
+   {{ node.body|safe }}
+  </div>
+</article>
+{% endblock node %}
+{% block right%}
+{% endblock %}

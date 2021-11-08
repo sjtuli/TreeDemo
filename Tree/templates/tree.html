@@ -1,0 +1,377 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <title>zTree-Demo | zTree展示</title>
+
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <!--  <link rel="stylesheet" href="/static/css/font-awesome.min.css">-->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="/static/css/toastr.min.css">
+    <link rel="stylesheet" href="/static/css/AdminLTE.min.css">
+    <link rel="stylesheet" href="/static/css/AdminLTE_all-skins.min.css">
+
+
+    {% block css %}
+        <link href="{% static 'css/zTreeStyle/zTreeStyle.css' %}" rel="stylesheet">
+    {% endblock %}
+    <!--  <link rel="Shortcut Icon" href="/static/img/favicon.ico">-->
+
+    <link rel="stylesheet" href="{% static 'css/local.google.fonts.css' %}">
+</head>
+<!--<body class="hold-transition skin-blue sidebar-mini">-->
+<div class="wrapper">
+    {% block breadcrumb %}
+        <button class="btn btn-default" onclick="createForm()">
+            <span class="glyphicon glyphicon-plus"></span> 添 加
+        </button>
+    <button class="btn btn-default" onclick="deleteForm()">
+            <span class="glyphicon glyphicon-minus"></span> 删 除
+        </button>
+    {% endblock %}
+    {% block content %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-widget">
+                    <div class="box-body">
+                        <ul id="treeDemo" class="ztree"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade" id="modalForm">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="modalForm_title"></h4>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="tab-content">
+                            <div class="tab-pane active">
+                                <form class="form-horizontal" id="modalForm_Content" method="post"
+                                      action="">{% csrf_token %}
+                                    <input type="text" id="form_id" value="" hidden>
+                                    <div class="form-group">
+                                        <label class="col-md-2 control-label"> 名称 </label>
+                                        <div class="col-md-9">
+                                            <input type="text" class="form-control" id="form_name" name="name" placeholder="实验/文件夹名称">
+                                            <span class="help-block"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-md-2 control-label"> 父节点 </label>
+                                        <div class="col-md-9">
+                                            <select class="form-control" id="form_parent" name="parent"
+                                                    onclick="showTree();"></select>
+
+                                            <div id="menuContent" class="menuContent" style="display:none;">
+                                                <ul id="treeDemo2" class="ztree" style="margin-top:0;"></ul>
+                                            </div>
+
+                                            <span class="help-block"></span>
+                                        </div>
+                                    </div>
+
+
+<!--{#                                                   disabled="disabled"#}-->
+
+                                    <div class="modal-footer">
+                                        <button class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                                        <!-- <button type="submit" class="btn btn-primary" onclick="submit_type=1">SAVE</button>-->
+                                        <button type="submit" class="btn btn-default" onclick="submit_type=1">SAVE
+                                        </button>
+                                        <button type="submit" class="btn btn-default" onclick="submit_type=2">Save and
+                                            add another
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+<!--删除节点-->
+       <div class="modal fade" id="modalForm2">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="modalForm_title2"></h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="tab-content">
+                            <div class="tab-pane active">
+                                <form class="form-horizontal" id="modalForm_Content2" method="post"
+                                      action="">{% csrf_token %}
+                                    <input type="text" id="form_id2" value="" hidden>
+
+                                    <div class="form-group">
+                                        <label class="col-md-2 control-label"> 被删除节点 </label>
+                                        <div class="col-md-9">
+                                            <select class="form-control" id="form_parent2" name="parent"
+                                                    onclick="showTree();"></select>
+                                            <div id="menuContent2" class="menuContent" style="display:none;">
+                                                <ul id="treeDemo22" class="ztree" style="margin-top:0;"></ul>
+                                            </div>
+                                            <span class="help-block"></span>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="modal-footer">
+                                        <button class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                                        <!-- <button type="submit" class="btn btn-primary" onclick="submit_type=1">SAVE</button>-->
+                                        <button type="submit" class="btn btn-default" onclick="submit_type=1">SAVE
+                                        </button>
+                                        <button type="submit" class="btn btn-default" onclick="submit_type=2">Save and
+                                            add another
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {#                                                   disabled="disabled"#}
+    {% endblock %}
+    {% block node %}
+    {% endblock node %}
+
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/jquery.custom.js' %}"></script>
+    <script src="{% static 'js/adminlte.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/toastr.min.js' %}"></script>
+
+
+    <script>
+        $('.sidebar-menu li a').each(function () {
+            var link = $(this).attr("href");
+            if (link == window.location.pathname) {
+                $(this).parent().addClass('active');
+                $(this).parent().parent().parent().addClass('active');
+            }
+        })
+    </script>
+    
+
+    {% block js %}
+        <script src="{% static 'js/jquery.ztree.all.min.js' %}"></script>
+        <script src="{% static 'js/django.ajax.post.csrf.js' %}"></script>
+        <script>
+            $('#page_header').text('组织架构树');
+            $('#page_header_descript').text('Department tree');
+
+            // 页面加载时生成树
+            var setting = {
+                data: {
+                    simpleData: {
+                        enable: true
+                    }
+                    },
+                callback: {
+                    onClick: onClick
+                }
+            };
+
+            $.fn.zTree.init($("#treeDemo"), setting, {{ data|safe }});//show znodes from views.py
+
+            // 点击创建时的表单信息
+            function createForm() {
+                $('#modalForm_title').text('添加节点');
+                $('#modalForm_Content').trigger("reset");
+
+                var setting2 = {
+                    view: {
+                        selectedMulti: false
+                    },
+                    data: {
+                        simpleData: {
+                            enable: true
+                        }
+                    },
+                    callback: {
+                        onClick: onClick1
+                    }
+                };
+                $.fn.zTree.init($("#treeDemo2"), setting2, {{ data|safe }});
+                $('#modalForm').modal('show');
+            }
+
+            //点击删除表单时的信息
+            function deleteForm(){
+                $('#modalForm_title2').text('删除节点');
+                $('#modalForm_Content2').trigger("reset");
+                var setting22 = {
+                    view: {
+                        selectedMulti: false
+                    },
+                    data: {
+                        simpleData: {
+                            enable: true
+                        }
+                    },
+                    callback: {
+                        onClick: onClick2
+                    }
+                };
+                $.fn.zTree.init($("#treeDemo22"), setting22, {{ data|safe }});
+                $('#modalForm2').modal('show');
+            }
+
+            // 当点击tree节点时触发
+            function onClick(e, treeId, treeNode) {
+                console.log(treeNode.id)
+
+                var url = "{% url 'tree:node' 'department_id' %}";
+                url = url.replace('node/department_id', 'node'+'/'+treeNode.id);
+                window.location.href=url;
+            }
+
+            // 当点击tree节点时触发
+            function onClick1(e, treeId, treeNode) {
+                var zTree = $.fn.zTree.getZTreeObj("treeDemo2");
+                nodes = zTree.getSelectedNodes();
+
+                // 将点击的节点填充到select下
+                $("#form_parent").html(
+                    "<option value='" + nodes[0].id + "'>" + nodes[0].name + "</option>"
+                );
+
+                // 填充之后隐藏树
+                hideTree();
+            }
+
+            // 当点击tree节点时触发
+            function onClick2(e, treeId, treeNode) {
+                var zTree = $.fn.zTree.getZTreeObj("treeDemo22");
+                nodes = zTree.getSelectedNodes();
+                // 将点击的节点填充到select下
+                $("#form_parent2").html(
+                    "<option value='" + nodes[0].id + "'>" + nodes[0].name + "</option>"
+                );
+                // 填充之后隐藏树
+                hideTree();
+            }
+
+            // 添加-点击下拉框时展示tree
+            function showTree() {
+                $("#menuContent").slideDown("fast");
+                $("#menuContent2").slideDown("fast");
+                $("body").bind("mousedown", onBodyDown);
+            }
+
+            // 隐藏tree
+            function hideTree() {
+                $("#menuContent").fadeOut("fast");
+                $("#menuContent2").fadeOut("fast");
+                $("body").unbind("mousedown", onBodyDown);
+            }
+
+            // 判断点击的位置不在下拉框或者时tree本身则调用hideTree隐藏树
+            function onBodyDown(event) {
+                if (!(event.target.id == "form_parent" || event.target.id == "menuContent" || $(event.target).parents("#menuContent").length > 0)) {
+                    hideTree();
+                }
+            }
+
+            //获取url路径
+            function getUrlPath() {
+                //获取当前网址
+                var currentPath = window.document.location.href;
+                //获取主机地址之后的目录
+                var pathName = window.document.location.pathname;
+                var pos = currentPath.indexOf(pathName);
+                //获取主机地址
+                var localhostPath = currentPath.substring(0, pos);
+                //获取带"/"的项目名
+                var projectName = pathName.substring(0, pathName.substr(1).indexOf('/') + 1);
+                return (currentPath);
+            }
+
+
+            $(function () {
+                console.log(getUrlPath());
+            });
+
+            // 添加 - Ajax提交
+            $('#modalForm_Content').submit(function (event) {
+                event.preventDefault();
+
+                if (confirm("确认提交这些数据吗？")) {
+                    params = $('#modalForm_Content').serializeJson();
+                    $.ajax({
+                        type: "post",
+                        url: "{% url 'tree:create-tree-url' %}",
+                        data: JSON.stringify(params),
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.state) {
+                                if (submit_type == 1) {
+                                    window.location = getUrlPath()
+                                }
+                                if (submit_type == 2) {
+                                    $('#modalForm_Content').trigger("reset");
+                                }
+
+                                toastr.success(data.message);
+                            } else {
+                                toastr.error(data.message)
+                            }
+                        },
+                        error: function () {
+                            toastr.error('Error: ajax 请求出错！')
+                        }
+                    });
+                }
+            });
+
+            $('#modalForm_Content2').submit(function (event) {
+                event.preventDefault();
+                if (confirm("确认提交这些数据吗？")) {
+                    params = $('#modalForm_Content2').serializeJson();
+                    $.ajax({
+                        type: "post",
+                        url: "{% url 'tree:delete-tree-url' %}",
+                        data: JSON.stringify(params),
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.state) {
+                                if (submit_type == 1) {
+                                    window.location = getUrlPath()
+                                }
+                                if (submit_type == 2) {
+                                    $('#modalForm_Content2').trigger("reset");
+                                }
+                                toastr.success(data.message);
+                            } else {
+                                toastr.error(data.message)
+                            }
+                        },
+                        error: function () {
+                            toastr.error('Error: ajax 请求出错！')
+                        }
+                    });
+                }
+            });
+        </script>
+    {% endblock %}
+    <!--</body>-->
+</div>
+</html>
+
+    
