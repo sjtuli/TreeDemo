@@ -1,14 +1,17 @@
-import json, markdown, os, re, random
+import json, markdown, re
+import os
+import random
+
 from PIL import Image
 from django import forms
 from django.conf import settings
-from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect, HttpResponse, FileResponse
+from django.http import HttpResponseRedirect, FileResponse
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.text import slugify
+from django.views.decorators.clickjacking import xframe_options_sameorigin
+from django.views.decorators.csrf import csrf_exempt
 from markdown.extensions.toc import TocExtension
 from django.contrib.auth.decorators import login_required
 from .models import Department, Node, NodeFile
@@ -24,10 +27,8 @@ def tree(request):
             'open': 1
         } for x in mList
     ]
-    return render(request, 'tree.html', context={'data':_data, })
+    return render(request, 'tree.html' , context={'data':_data})
 
-
-# @login_required(login_url='/account/login')
 def create(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
@@ -67,7 +68,6 @@ def node_detail(request, department_id):
         pass
     node = department.node.get()
     _nodefile = department.file.filter()
-    # post = node
     md = markdown.Markdown(extensions=[
         'markdown.extensions.extra',
         'markdown.extensions.codehilite',
@@ -88,23 +88,27 @@ def node_detail(request, department_id):
         } for x in mList
     ]
     return render(request, 'content_node.html', context={'user': user, 'department': department, 'node': node,
-                                                                   'data':_data, 'nodefile':_nodefile })
+                                                                  'data':_data, 'nodefile':_nodefile })
 
-
-# @login_required(login_url='/account/login')
+@login_required(login_url='/account/login')
 def modify_post(request, department_id):
     department = Department.objects.get(id=department_id)
     node = department.node.get()
     if request.method == 'GET':
-        return render(request,"modify_post.html", locals())  # 需要编写修改答案模板
+        return render(request, "modify_post.html",
+                      {"node": node,})  # 需要编写修改答案模板
     else:
-        # answer_form = AnswerForm(request.POST)
-        # if answer_form.is_valid():
         node.body = request.POST.get('editormd-markdown-doc')
         node.save()
         return HttpResponseRedirect(reverse('tree:node', args=(department_id,)))
 
 
+class FileForm(forms.Form):
+    myfile = forms.FileField(required=True)
+
+
+@csrf_exempt
+@xframe_options_sameorigin
 def upload_img(request):
     if request.method == "POST":
         data = request.FILES['editormd-image-file']
@@ -145,13 +149,6 @@ def upload_img(request):
 
 
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MEDIA_ROOT = os.path.join(BASE_DIR, 'upload/')
-
-
-class FileForm(forms.Form):
-    myfile = forms.FileField(required=True)
-
 def upload_file(request, department_id):
     if request.method == "POST":  # 请求方法为POST时，进行处理
         form = FileForm(request.POST, request.FILES)
@@ -180,7 +177,7 @@ def upload_file(request, department_id):
 
 
 
-
+# 不使用FileField字段时
 # def upload_file(request, department_id):
 #     if request.method == "POST":  # 请求方法为POST时，进行处理
 #         myFile = request.FILES.get("myfile", None)  # 获取上传的文件，如果没有文件，则默认为None
@@ -203,21 +200,28 @@ def upload_file(request, department_id):
 
 
 def download_file(request,department_id,pk):
-    if pk:
-        file_name = NodeFile.objects.get(pk=pk).File_name
-        file = open(os.path.join(os.path.join(MEDIA_ROOT, str(department_id)), file_name), 'rb')
+    file_name = NodeFile.objects.get(pk=pk).File_name
+    # 这里由于FileField的傻逼设定，上传文件的时候有时候会更改你的文件名，因而放弃采用字符串拼接的路径
+    file_path = NodeFile.objects.get(pk=pk).File.path
+    # file_path = os.path.join('media/upload/', str(department_id)) + '/' + str(file_name)
+    file = open(file_path,'rb')
+    #不知道为什么，如果是with openfile,会导致后面的response 的时候报ValueError: read of closed file
+    try:
         response = FileResponse(file)
         response['Content-Type'] = 'application/octet-stream'
         filename = 'attachment; filename='+file_name
         response['Content-Disposition'] = filename.encode('utf-8', 'ISO-8859-1')  # 设定传输给客户端的文件名称
         return response
+    except Exception as e:
+        print('download file error is %s' %(e))
+        return JsonResponse({'state': 0, 'message': 'download Error: ' + str(e)})
 
 def delete_file(request,department_id,pk):
+    # 删除是直接删了，当然成熟的项目应该是更改 is_active = False
     try:
         file = NodeFile.objects.get(pk=pk)
         file.delete()
     except Exception as e:
         print('delete error is %s' %(e))
         return JsonResponse({'state': 0, 'message': 'Delete Error: ' + str(e)})
-    # return HttpResponse("upload over!")
     return HttpResponseRedirect(reverse('tree:node', args=(department_id,)))
