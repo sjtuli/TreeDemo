@@ -1,6 +1,6 @@
 {% extends "tree.html" %}
 {% load static %}
-{% load markdown_extras %}
+
 {% block node %}
 
 <h4>{{department.name}}</h4>
@@ -10,9 +10,7 @@
       <span class="post-author"><a href="#">{{ node.author }}</a></span>
     </div>
 
-{% if user.is_superuser %}
 <a href="modify/"><button class="btn btn-default ">修改</button></a>
-{% endif %}
 
 {% for nodefile in nodefile %}
 {% if nodefile.pk %}

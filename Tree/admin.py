@@ -4,7 +4,6 @@ from django.contrib import admin
 from .models import Department, Node ,NodeFile
 
 
-
 @admin.register(Department)  # 注册
 class DepartmentAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'parent')

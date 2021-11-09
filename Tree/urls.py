@@ -17,16 +17,20 @@ from django.contrib import admin
 from django.urls import path
 from . import views
 from django.conf.urls import include
+from django.conf.urls.static import static
+from django.conf import settings
 
 urlpatterns = [
     path('', views.tree),
     path('create/', views.create, name='create-tree-url'),
     path('delete/', views.delete, name='delete-tree-url'),
-    path('mdeditor_upload_img/', views.upload_img, name='upload_img'),
-    path('node/<department_id>/', views.node_detail,name='node'),
+    path('upload_img/', views.upload_img, name='upload_img'),
+    path('node/<department_id>/', views.node_detail, name='node'),
     path('node/<int:department_id>/modify/', views.modify_post, name='modify'),
     path('node/<int:department_id>/modify/uploadFile/', views.upload_file, name='uploadFile'),
     path('node/<int:department_id>/modify/deleteFile/<int:pk>', views.delete_file, name='delete_file'),
-    path('node/<int:department_id>/download_file/<int:pk>/',views.download_file,name='download_file'),
+    path('node/<int:department_id>/download_file/<int:pk>/', views.download_file, name='download_file'),
 
 ]
+
+

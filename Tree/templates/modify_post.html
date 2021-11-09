@@ -1,12 +1,6 @@
 {% extends "tree.html" %}
 {% load static %}
 {% block node %}
-<!--&lt;!&ndash;上传&ndash;&gt;-->
-<!--<form enctype="multipart/form-data" action="uploadFile/" method="post">{% csrf_token %}-->
-<!--       <input type="file" name="myfile" />-->
-<!--       <br/>-->
-<!--       <input type="submit" value="upload"/>-->
-<!--    </form>-->
 
 <html>
 <head>
@@ -22,7 +16,17 @@
     </form>
 </body>
 </html>
-
+<body>
+<!--markdown-->
+<div class="editor">
+    <form action="" method="post">
+    	{% csrf_token %}
+        <label for="title">标题:</label>
+        <input name="title" type="text" id="title"><br>
+        {{ form.as_p }}
+        <input type="submit" value="提交">
+    </form>
+</div>
 
 <!--markdown-->
 <link rel="stylesheet" href="{% static 'editor/css/style.css' %}">
@@ -39,8 +43,6 @@
      <div class="row">
         <button class="btn btn-default" type="submit" class="btn btn-default" style="margin-left:200px">回答</button>
     </div>
-
-
 </form>
 
             <!--markdown-->
@@ -48,14 +50,12 @@
 <script type="text/javascript">
     $(function() {
 var editor  = editormd("editormd",{
-            width : "100%",
+            width : '50%',
             height : 420,
             path : "{% static 'editor/lib/' %}",
             syncScrolling : "single",
             tocm: true,         // Using [TOCM]
                     tex: true,                   // 开启科学公式TeX语言支持，默认关闭
-                    flowChart: true,             // 开启流程图支持，默认关闭
-                    sequenceDiagram: true,       // 开启时序/序列图支持，默认关闭,
                     imageUpload: true,
                     imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
                     imageUploadURL: "{% url 'tree:upload_img' %}",
@@ -65,31 +65,5 @@ var editor  = editormd("editormd",{
         });
     });
 </script>
+</body>
 {% endblock %}
-
-<!--<script>-->
-<!--      function upload_file(file) {-->
-<!--        $.ajax(-->
-<!--            {-->
-<!--                url: "{% url 'tree:uploadFile' %}",-->
-<!--                type: "POST",-->
-<!--                data: { "myFile": file },-->
-<!--                success: function (e) {-->
-<!--                    if (e === 1) {-->
-<!--                        layer.msg("上传成功");-->
-<!--                        window.location.reload();-->
-
-<!--                    } else {-->
-<!--                        layer.msg("上传失败");-->
-<!--                        window.location.reload();-->
-<!--                    }-->
-<!--                },-->
-<!--                error: function (e) {-->
-<!--                    layer.msg("无文件");-->
-
-<!--                }-->
-<!--            });-->
-
-<!--    }-->
-
-<!--</script>-->

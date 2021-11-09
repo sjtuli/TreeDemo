@@ -1,7 +1,6 @@
 import json, markdown, re
 import os
 import random
-
 from PIL import Image
 from django import forms
 from django.conf import settings
@@ -27,7 +26,7 @@ def tree(request):
             'open': 1
         } for x in mList
     ]
-    return render(request, 'tree.html' , context={'data':_data})
+    return render(request, 'tree.html' , context={'data':_data} )
 
 def create(request):
     if request.method == 'POST':
@@ -69,12 +68,14 @@ def node_detail(request, department_id):
     node = department.node.get()
     _nodefile = department.file.filter()
     md = markdown.Markdown(extensions=[
+        # 包含 缩写、表格等常用扩展
         'markdown.extensions.extra',
+        # 语法高亮扩展
         'markdown.extensions.codehilite',
         'markdown.extensions.toc',
         TocExtension(slugify=slugify),
     ])
-    node.body = md.convert(node.body)
+    node.body = md.convert(node.body.replace("\r\n",' \n'))
     m = re.search(r'<div class="toc">\s*<ul>(.*)</ul>\s*</div>', md.toc, re.S)
     node.toc = m.group(1) if m is not None else ' '
 
@@ -90,13 +91,13 @@ def node_detail(request, department_id):
     return render(request, 'content_node.html', context={'user': user, 'department': department, 'node': node,
                                                                   'data':_data, 'nodefile':_nodefile })
 
-@login_required(login_url='/account/login')
+
+# @login_required(login_url='/account/login')
 def modify_post(request, department_id):
     department = Department.objects.get(id=department_id)
     node = department.node.get()
     if request.method == 'GET':
-        return render(request, "modify_post.html",
-                      {"node": node,})  # 需要编写修改答案模板
+        return render(request, "modify_post.html", {"node": node})  # 需要编写修改答案模板
     else:
         node.body = request.POST.get('editormd-markdown-doc')
         node.save()
@@ -131,21 +132,21 @@ def upload_img(request):
 
         img.thumbnail((width, height), Image.ANTIALIAS)  # 生成缩略图
         url = 'editor/' + data.name
-        name = settings.MEDIA_ROOT + url
-        if os.path.exists(name):
+        path = settings.MEDIA_ROOT + url
+        if os.path.exists(path):
             (file, ext) = os.path.splitext(data.name)
             file = file + str(random.randint(1, 1000))
             data.name = file + ext
             url = 'editor/' + data.name
-            name = settings.MEDIA_ROOT + url
+            path = settings.MEDIA_ROOT + url
         try:
-            img.save(name)
+            img.save(path)
             url = 'media/editor/' + data.name
             # url = '/static' + name.split('static')[-1]
             # url = name.split('static')[-1]
             return JsonResponse({"success": 1, "message": "成功", "url": url})
         except Exception as e:
-            return JsonResponse({'success': 0, 'message': '上传失败'})
+            return JsonResponse({'success': 0, 'message': 'Create Error: ' + str(e)})
 
 
 
@@ -168,7 +169,6 @@ def upload_file(request, department_id):
                 }
                 NodeFile.objects.create(**postdata)
                 return HttpResponseRedirect(reverse('tree:node', args=[department_id]))
-                # return HttpResponse('file upload ok')
             except Exception as e:
                 return JsonResponse({'state': 0, 'message': 'Create Error: ' + str(e)})
         else:

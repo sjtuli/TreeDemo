@@ -17,12 +17,15 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import path, re_path
 from django.conf.urls import include, url
+from django.views.generic import RedirectView
 from django.views.static import serve
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include(('Tree.urls','Tree'),namespace='tree')),
+    path('', RedirectView.as_view(url='Tree/')),
+    path('Tree/', include(('Tree.urls','Tree'), namespace='tree')),
     # path('Tree',include(('Tree.urls','Tree'),namespace='Tree'))
     re_path(r'media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
     url(r'mdeditor/', include('mdeditor.urls')),
 ]
+
